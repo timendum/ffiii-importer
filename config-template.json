@@ -1,0 +1,12 @@
+{
+    "assets": {
+        "Arancio": 1,
+        "Carta Credito ING": 2,
+        "Paypal": 5
+    }, 
+    "expenses": {
+        "Generic": 10
+    },
+    "instance": "https://firefly.example.com",
+    "token": "OAuth Personal Access Tokens"
+}
