@@ -43,11 +43,13 @@ def process_csv(filename: str):
         # skip header
         next(reader)
         for row in reader:
-            amounts = row[7].split(",")
+            amounts = row[7].split(".")
             if len(amounts) != 2:
-                continue
+                amounts = row[7].split(",")
+                if len(amounts) != 2:
+                    continue
             if amounts[0][0] != "-":
-                print("Skipped " + " ".join(row[0:5]))
+                print("Skipped: " + " ".join(row[3:5]))
                 continue
             amounts[0] = amounts[0][1:]
             transactions.append(
@@ -62,5 +64,18 @@ def process_csv(filename: str):
                     "tags": [job_tag],
                 }
             )
+        if not transactions:
+            return "No transaction"
         resp = ffapi.send(transactions)
         return resp or "See {}/tags/show/{}".format(ffapi.INSTANCE, job_tag)
+
+
+if __name__ == "__main__":
+    import pprint
+    import sys
+
+    if len(sys.argv) < 2:
+        result = "python " + sys.argv[0] + " filename"
+    else:
+        result = process_csv(sys.argv[1])
+    pprint.pprint(result)
