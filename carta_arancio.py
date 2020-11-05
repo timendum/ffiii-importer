@@ -56,6 +56,8 @@ def read_carta(filename: str):
                 "tags": [job_tag],
             }
         )
+    if not transactions:
+        return "No transaction"
     resp = ffapi.send(transactions)
     return resp or "See {}/tags/show/{}".format(ffapi.INSTANCE, job_tag)
 
@@ -66,5 +68,5 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         result = "python " + sys.argv[0] + " filename"
     else:
-        result = read_carta(sys.argv[2])
+        result = read_carta(sys.argv[1])
     pprint.pprint(result)
