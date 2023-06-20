@@ -27,7 +27,7 @@ def _transform_date(sdate: str) -> str:
 def read_conto(filename: str):
     table = read_html_file(filename)
     transactions = []
-    job_tag = "import-" + dt.now().isoformat(timespec="minutes")
+    job_tag = "import-arancio-" + dt.now().isoformat(timespec="minutes")
     for row in table:
         if len(row) != 5:
             continue

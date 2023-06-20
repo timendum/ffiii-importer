@@ -30,7 +30,7 @@ def read_conto(filename: str):
     wb = load_workbook(filename)
     ws = wb.worksheets[0]
     transactions = []
-    job_tag = "import-" + dt.now().isoformat(timespec="minutes")
+    job_tag = "import-intesa-" + dt.now().isoformat(timespec="minutes")
     for row in ws.rows:
         if len(row) < 7:
             continue

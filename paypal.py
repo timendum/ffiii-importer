@@ -37,14 +37,14 @@ PP_DIALECT = PP_Dialect()
 
 def process_csv(filename: str):
     transactions = []
-    job_tag = "import-" + dt.now().isoformat(timespec="minutes")
+    job_tag = "import-paypal-" + dt.now().isoformat(timespec="minutes")
     with open(filename, newline="", encoding="utf8") as f:
         reader = csv.reader(f, dialect=PP_DIALECT)
         # skip header
         next(reader)
         for row in reader:
             amounts = row[7].split(".")
-            if len(amounts) != 2:
+            if len(amounts) != 2 or len(amounts[1]) != 2:
                 amounts = row[7].split(",")
                 if len(amounts) != 2:
                     continue
@@ -58,7 +58,7 @@ def process_csv(filename: str):
                     "date": _transform_date(row[0]),
                     "source_id": ASSET_PAYPAL,
                     "destination_id": EXPENSE,
-                    "amount": str(int(amounts[0])) + "." + amounts[1],
+                    "amount": str(int("".join(amounts[0].split(".")))) + "." + amounts[1],
                     "description": " - ".join(row[3:5]),
                     "currency_code": row[6],
                     "tags": [job_tag],

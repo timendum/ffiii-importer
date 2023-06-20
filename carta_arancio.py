@@ -29,7 +29,7 @@ def _transform_date(sdate: str) -> str:
 
 def read_carta(filename: str):
     table = read_html_file(filename)
-    job_tag = "import-" + dt.now().isoformat(timespec="minutes")
+    job_tag = "import-cartaing-" + dt.now().isoformat(timespec="minutes")
     transactions = []
     for row in table:
         if len(row) != 5:
@@ -39,8 +39,11 @@ def read_carta(filename: str):
         if match:
             # Remove " ITA EUR 100,00"
             description = match.group(1)
-        amounts = row[4].split(",")
+        amounts = row[4].replace('.', '').split(",")
         if len(amounts) != 2:
+            continue
+        if int(amounts[0]) < 0 :
+            print("Skipped: " + " ".join(row))
             continue
         book_date = _transform_date(row[1])
         transactions.append(
