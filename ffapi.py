@@ -27,5 +27,6 @@ def send(transactions):
             headers={"Authorization": "Bearer " + TOKEN, "Accept": "application/json"},
         )
         if response.status_code != 200:
-            return response.text
+            print(response.text, transaction)
+            continue
     return False
