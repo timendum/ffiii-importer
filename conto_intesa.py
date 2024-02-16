@@ -6,13 +6,12 @@ from openpyxl import load_workbook
 
 import ffapi
 
-
 ASSET_CONTO = None
 EXPENSE = None
 
 
 def _load_config():
-    with open("config.json", "r", encoding="utf8") as fp:
+    with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
     global ASSET_CONTO, EXPENSE
     ASSET_CONTO = config["assets"]["Intesa"]
@@ -36,6 +35,8 @@ def read_conto(filename: str):
             continue
         values = [c.value for c in row]
         if not values[0] or not values[1] or not values[4]:
+            if values[0] and values[1] and not values[4] and values[3] and isinstance(values[3], float):
+                print(f"Skipped: {row[3].value} - {row[5].value}")
             continue
         if not isinstance(values[4], float):
             continue
@@ -61,7 +62,7 @@ def read_conto(filename: str):
     if not transactions:
         return "No transaction"
     resp = ffapi.send(transactions)
-    return resp or "See {}/tags/show/{}".format(ffapi.INSTANCE, job_tag)
+    return resp or f"See {ffapi.INSTANCE}/tags/show/{job_tag}"
 
 
 if __name__ == "__main__":
