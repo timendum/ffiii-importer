@@ -8,7 +8,7 @@ INSTANCE = None
 
 
 def _load_config():
-    with open("config.json", "r", encoding="utf8") as fp:
+    with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
     global TOKEN, INSTANCE
     TOKEN = config["token"]

@@ -29,7 +29,7 @@ class HTMLTable(HTMLParser):
 
 
 def read_file(filename: str):
-    with open(filename, "rt", encoding="utf8") as fo:
+    with open(filename, encoding="utf8") as fo:
         s = fo.read()
     parser = HTMLTable()
     parser.feed(s)

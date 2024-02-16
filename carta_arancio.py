@@ -12,7 +12,7 @@ EXPENSE = None
 
 
 def _load_config():
-    with open("config.json", "r", encoding="utf8") as fp:
+    with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
     global ASSET_CARTA, ASSET_CONTO, EXPENSE
     ASSET_CARTA = config["assets"]["Carta Credito ING"]
@@ -62,7 +62,7 @@ def read_carta(filename: str):
     if not transactions:
         return "No transaction"
     resp = ffapi.send(transactions)
-    return resp or "See {}/tags/show/{}".format(ffapi.INSTANCE, job_tag)
+    return resp or f"See {ffapi.INSTANCE}/tags/show/{job_tag}"
 
 
 if __name__ == "__main__":
