@@ -66,10 +66,8 @@ def read_conto(filename: str):
 
 
 if __name__ == "__main__":
-    import pprint
-
     if len(sys.argv) < 2:
         result = "python " + sys.argv[0] + " filename"
     else:
         result = read_conto(sys.argv[1])
-    pprint.pprint(result)
+    print(result)

@@ -3,7 +3,8 @@
         "Arancio": 1,
         "Carta Credito ING": 2,
         "Paypal": 5,
-        "Intesa": 3
+        "Intesa": 3,
+        "Credit Agricole": 4
     }, 
     "expenses": {
         "Generic": 10
