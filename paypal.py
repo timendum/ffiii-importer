@@ -4,19 +4,16 @@ from datetime import datetime as dt
 
 import ffapi
 
-ASSET_PAYPAL = None
-EXPENSE = None
-
 
 def _load_config():
     with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
-    global ASSET_PAYPAL, EXPENSE
-    ASSET_PAYPAL = config["assets"]["Paypal"]
-    EXPENSE = config["expenses"]["Generic"]
+    asset_paypal = config["assets"]["Paypal"]
+    expense = config["expenses"]["Generic"]
+    return asset_paypal, expense
 
 
-_load_config()
+ASSET_PAYPAL, EXPENSE = _load_config()
 
 
 def _transform_date(sdate: str) -> str:
@@ -71,11 +68,10 @@ def process_csv(filename: str):
 
 
 if __name__ == "__main__":
-    import pprint
     import sys
 
     if len(sys.argv) < 2:
         result = "python " + sys.argv[0] + " filename"
     else:
         result = process_csv(sys.argv[1])
-    pprint.pprint(result)
+    print(result)

@@ -5,19 +5,16 @@ from datetime import datetime as dt
 import ffapi
 from htmltable import read_file as read_html_file
 
-ASSET_CONTO = None
-EXPENSE = None
-
 
 def _load_config():
     with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
-    global ASSET_CONTO, EXPENSE
-    ASSET_CONTO = config["assets"]["Arancio"]
-    EXPENSE = config["expenses"]["Generic"]
+    asset_conto = config["assets"]["Arancio"]
+    expense = config["expenses"]["Generic"]
+    return asset_conto, expense
 
 
-_load_config()
+ASSET_CONTO, EXPENSE = _load_config()
 
 
 def _transform_date(sdate: str) -> str:
@@ -58,10 +55,8 @@ def read_conto(filename: str):
 
 
 if __name__ == "__main__":
-    import pprint
-
     if len(sys.argv) < 2:
         result = "python " + sys.argv[0] + " filename"
     else:
         result = read_conto(sys.argv[1])
-    pprint.pprint(result)
+    print(result)

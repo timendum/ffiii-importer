@@ -4,19 +4,16 @@ from datetime import datetime as dt
 
 import ffapi
 
-ASSET_PAYPAL = None
-EXPENSE = None
-
 
 def _load_config():
     with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
-    global ASSET_CAGRIC, EXPENSE
-    ASSET_CAGRIC = config["assets"]["Credit Agricole"]
-    EXPENSE = config["expenses"]["Generic"]
+    asset_conto = config["assets"]["Credit Agricole"]
+    expense = config["expenses"]["Generic"]
+    return asset_conto, expense
 
 
-_load_config()
+ASSET_CONTO, EXPENSE = _load_config()
 
 
 def _transform_date(sdate: str) -> str:
@@ -55,7 +52,7 @@ def process_csv(filename: str):
                 {
                     "type": "withdrawal",
                     "date": _transform_date(row[1]),
-                    "source_id": ASSET_CAGRIC,
+                    "source_id": ASSET_CONTO,
                     "destination_id": EXPENSE,
                     "amount": str(int("".join(amounts[0].split(".")))) + "." + amounts[1],
                     "description": row[3].strip(),

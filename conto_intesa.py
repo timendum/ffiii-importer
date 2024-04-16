@@ -6,19 +6,16 @@ from openpyxl import load_workbook
 
 import ffapi
 
-ASSET_CONTO = None
-EXPENSE = None
-
 
 def _load_config():
     with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
-    global ASSET_CONTO, EXPENSE
-    ASSET_CONTO = config["assets"]["Intesa"]
-    EXPENSE = config["expenses"]["Generic"]
+    asset_conto = config["assets"]["Intesa"]
+    expense = config["expenses"]["Generic"]
+    return asset_conto, expense
 
 
-_load_config()
+ASSET_CONTO, EXPENSE = _load_config()
 
 
 def _transform_date(sdate: dt) -> str:
