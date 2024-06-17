@@ -2,9 +2,8 @@ import json
 import sys
 from datetime import datetime as dt
 
-from openpyxl import load_workbook
-
 import ffapi
+from htmltable import read_file as read_html_file
 
 
 def _load_config():
@@ -23,22 +22,19 @@ def _transform_date(sdate: str) -> str:
 
 
 def read_conto(filename: str):
-    wb = load_workbook(filename)
-    ws = wb.worksheets[0]
+    table = read_html_file(filename)
     transactions = []
     job_tag = "import-arancio-" + dt.now().isoformat(timespec="minutes")
-    for row in ws.rows:
-        if len(row) < 6:
+    for row in table:
+        if len(row) != 5:
             continue
-        if not all(row[i].value for i in (1, 2, 3, 4, 5)):
-            continue
-        amounts = str(row[5].value).split(".")
+        amounts = row[4][2:].replace('.', '').split(",")
         if len(amounts) != 2:
             continue
         if amounts[0][0] == "-":
             amounts[0] = amounts[0][1:]
-        contabile = _transform_date(row[1].value)
-        valuta = _transform_date(row[2].value)
+        contabile = _transform_date(row[0])
+        valuta = _transform_date(row[1])
         transactions.append(
             {
                 "type": "withdrawal",
@@ -46,10 +42,10 @@ def read_conto(filename: str):
                 "destination_id": EXPENSE,
                 "amount": str(int(amounts[0])) + "." + amounts[1],
                 "date": contabile,
-                "description": row[4].value.strip(),
+                "description": row[3].strip(),
                 "interest_date": contabile,
                 "payment_date": valuta,
-                "tags": [job_tag, row[3].value.strip().replace(" ", "-").replace("/", "-")],
+                "tags": [job_tag],
             }
         )
     if not transactions:
