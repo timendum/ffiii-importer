@@ -1,5 +1,6 @@
 import json
 import urllib.parse
+import sys
 
 import requests
 
@@ -17,15 +18,26 @@ def _load_config():
 
 _load_config()
 
+def print_progess(done: int, total: int) -> None:
+    if total < 1:
+        return
+    i = 100 * done // total
+    print("\r", end="")
+    print("Progress:   {}%: ".format(i), "=" * (i // 2), end="")
+    if done >= total:
+        print("\n", end="")
+    sys.stdout.flush()
+    
 
 def send(transactions):
     url = urllib.parse.urljoin(INSTANCE, "/api/v1/transactions")
-    for transaction in transactions:
+    for i, transaction in enumerate(transactions):
         response = requests.post(
             url=url,
             json={"transactions": [transaction]},
             headers={"Authorization": "Bearer " + TOKEN, "Accept": "application/json"},
         )
+        print_progess(i+1, len(transactions))
         if response.status_code != 200:
             print(response.text, transaction)
             continue
