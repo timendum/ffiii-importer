@@ -18,7 +18,9 @@ def _load_config():
 ASSET_CONTO, EXPENSE = _load_config()
 
 
-def _transform_date(sdate: str) -> str:
+def _transform_date(sdate: str | dt) -> str:
+    if isinstance(sdate, dt):
+        return sdate.date().isoformat()
     return dt.strptime(sdate, "%d/%m/%Y").date().isoformat()
 
 
