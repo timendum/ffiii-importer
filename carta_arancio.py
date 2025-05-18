@@ -2,9 +2,12 @@ import json
 import re
 import sys
 from datetime import datetime as dt
+import warnings
+
+from openpyxl import load_workbook
 
 import ffapi
-from htmltable import read_file as read_html_file
+from conto_arancio import transform_date
 
 
 def _load_config():
@@ -18,39 +21,39 @@ def _load_config():
 ASSET_CARTA, EXPENSE = _load_config()
 
 
-def _transform_date(sdate: str) -> str:
-    return dt.strptime(sdate, "%d/%m/%Y").date().isoformat()
-
-
 def read_carta(filename: str):
-    table = read_html_file(filename)
+    wb = None
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore", category=UserWarning, module=re.escape("openpyxl.styles.stylesheet")
+        )
+        wb = load_workbook(filename)
+    ws = wb.worksheets[0]
     job_tag = "import-cartaing-" + dt.now().isoformat(timespec="minutes")
     transactions = []
-    for row in table:
+    for row in ws.rows:
         if len(row) != 5:
             continue
-        description = row[2].strip()
-        match = re.search(r"(.+?)\s+[A-Z]{3}\sEUR", description)
-        if match:
-            # Remove " ITA EUR 100,00"
-            description = match.group(1)
-        amounts = row[4].replace('.', '').split(",")
+        if not all(row[i].value for i in (1, 2, 3, 4)):
+            continue
+        description = row[3].value.strip()
+        amounts = str(row[4].value).split(".")
         if len(amounts) != 2:
             continue
-        if int(amounts[0]) < 0 :
-            print("Skipped: " + " ".join(row))
-            continue
-        book_date = _transform_date(row[1])
+        if amounts[0][0] == "-":
+            amounts[0] = amounts[0][1:]
+        contabile = transform_date(row[2].value)
+        valuta = transform_date(row[1].value)
         transactions.append(
             {
                 "type": "withdrawal",
                 "source_id": ASSET_CARTA,
                 "destination_id": EXPENSE,
                 "amount": str(int(amounts[0])) + "." + amounts[1],
-                "date": book_date,
+                "date": contabile,
                 "description": description,
-                "book_date": book_date,
-                "payment_date": _transform_date(row[0]),
+                "interest_date": contabile,
+                "payment_date": valuta,
                 "tags": [job_tag],
             }
         )

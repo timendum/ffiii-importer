@@ -18,7 +18,7 @@ def _load_config():
 ASSET_CONTO, EXPENSE = _load_config()
 
 
-def _transform_date(sdate: str | dt) -> str:
+def transform_date(sdate: str | dt) -> str:
     if isinstance(sdate, dt):
         return sdate.date().isoformat()
     return dt.strptime(sdate, "%d/%m/%Y").date().isoformat()
@@ -39,8 +39,8 @@ def read_conto(filename: str):
             continue
         if amounts[0][0] == "-":
             amounts[0] = amounts[0][1:]
-        contabile = _transform_date(row[1].value)
-        valuta = _transform_date(row[2].value)
+        contabile = transform_date(row[1].value)
+        valuta = transform_date(row[2].value)
         transactions.append(
             {
                 "type": "withdrawal",
