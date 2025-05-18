@@ -4,13 +4,11 @@ version = "0.1.0"
 description = "Import banks files to FireFly"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-"requests>=2.24.0,<3.0.0",
-"openpyxl>=3.0.5,<4.0.0"]
+dependencies = ["requests>=2.24.0,<3.0.0", "openpyxl>=3.0.5,<4.0.0"]
 
 [tool.ruff]
 # Enable Pyflakes `E` and `F` codes by default.
-select = ["E", "F", "W", "I", "N", "UP", "B", "G", "PIE", "TCH", "PLE", "PLW"]
-ignore = []
+lint.select = ["E", "F", "W", "I", "N", "UP", "B", "G", "PIE", "TCH", "PLE", "PLW"]
+lint.ignore = []
 line-length = 100
-show-source = true
+output-format = "full"
