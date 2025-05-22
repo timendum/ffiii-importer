@@ -1,6 +1,6 @@
 import json
-import urllib.parse
 import sys
+import urllib.parse
 
 import requests
 
@@ -24,7 +24,7 @@ def print_progess(done: int, total: int) -> None:
         return
     i = 100 * done // total
     print("\r", end="")
-    print("Progress:   {}%: ".format(i), "=" * (i // 2), end="")
+    print(f"Progress:   {i}%: ", "=" * (i // 2), end="")
     if done >= total:
         print("\n", end="")
     sys.stdout.flush()
