@@ -32,7 +32,13 @@ def read_conto(filename: str):
             continue
         values = [c.value for c in row]
         if not values[0] or not values[1] or not values[4]:
-            if values[0] and values[1] and not values[4] and values[3] and isinstance(values[3], float):
+            if (
+                values[0]
+                and values[1]
+                and not values[4]
+                and values[3]
+                and isinstance(values[3], float)
+            ):
                 print(f"Skipped: {row[3].value} - {row[5].value}")
             continue
         if not isinstance(values[4], float):

@@ -40,7 +40,8 @@ def process_csv(filename: str):
         # skip header
         next(reader)
         for row in reader:
-            amounts = row[4].replace('.', '').split(",")
+            amounts = row[4].replace(".", "").split(",")
+            amounts[0] = amounts[0].strip().lstrip("'")
             if len(amounts) != 2:
                 print("Wrong amount: ", row[4])
                 continue

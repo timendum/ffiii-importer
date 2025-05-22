@@ -18,6 +18,7 @@ def _load_config():
 
 _load_config()
 
+
 def print_progess(done: int, total: int) -> None:
     if total < 1:
         return
@@ -27,7 +28,7 @@ def print_progess(done: int, total: int) -> None:
     if done >= total:
         print("\n", end="")
     sys.stdout.flush()
-    
+
 
 def send(transactions):
     url = urllib.parse.urljoin(INSTANCE, "/api/v1/transactions")
@@ -37,7 +38,7 @@ def send(transactions):
             json={"transactions": [transaction]},
             headers={"Authorization": "Bearer " + TOKEN, "Accept": "application/json"},
         )
-        print_progess(i+1, len(transactions))
+        print_progess(i + 1, len(transactions))
         if response.status_code != 200:
             print(response.text, transaction)
             continue
