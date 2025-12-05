@@ -8,20 +8,20 @@ import ffapi
 def _load_config():
     with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
-    asset_paypal = config["assets"]["Paypal"]
+    asset_conto = config["assets"]["Credit Agricole"]
     expense = config["expenses"]["Generic"]
-    return asset_paypal, expense
+    return asset_conto, expense
 
 
-ASSET_PAYPAL, EXPENSE = _load_config()
+ASSET_CONTO, EXPENSE = _load_config()
 
 
 def _transform_date(sdate: str) -> str:
     return dt.strptime(sdate, "%d/%m/%Y").date().isoformat()
 
 
-class PP_Dialect(csv.Dialect):
-    delimiter = ","
+class CA_Dialect(csv.Dialect):
+    delimiter = ";"
     quotechar = '"'
     doublequote = True
     skipinitialspace = False
@@ -29,41 +29,41 @@ class PP_Dialect(csv.Dialect):
     quoting = csv.QUOTE_MINIMAL
 
 
-PP_DIALECT = PP_Dialect()
+CA_DIALECT = CA_Dialect()
 
 
 def process_csv(filename: str):
     transactions = []
-    job_tag = "import-paypal-" + dt.now().isoformat(timespec="minutes")
+    job_tag = "import-cagric-" + dt.now().isoformat(timespec="minutes")
     with open(filename, newline="", encoding="utf8") as f:
-        reader = csv.reader(f, dialect=PP_DIALECT)
+        reader = csv.reader(f, dialect=CA_DIALECT)
         # skip header
         next(reader)
         for row in reader:
-            amounts = row[7].split(".")
-            if len(amounts) != 2 or len(amounts[1]) != 2:
-                amounts = row[7].split(",")
-                if len(amounts) != 2:
-                    continue
+            amounts = row[4].replace(".", "").split(",")
+            amounts[0] = amounts[0].strip().lstrip("'")
+            if len(amounts) != 2:
+                print("Wrong amount: ", row[4])
+                continue
             if amounts[0][0] != "-":
-                print("Skipped: " + " ".join(row[3:5]))
+                print(f"Skipped: {row[4]} - {row[3]}")
                 continue
             amounts[0] = amounts[0][1:]
             transactions.append(
                 {
                     "type": "withdrawal",
-                    "date": _transform_date(row[0]),
-                    "source_id": ASSET_PAYPAL,
+                    "date": _transform_date(row[1]),
+                    "source_id": ASSET_CONTO,
                     "destination_id": EXPENSE,
                     "amount": str(int("".join(amounts[0].split(".")))) + "." + amounts[1],
-                    "description": " - ".join(row[3:5]),
-                    "currency_code": row[6],
+                    "description": row[3].strip(),
+                    "notes": row[2].strip(),
                     "tags": [job_tag],
                 }
             )
         if not transactions:
             return "No transaction"
-        resp = ffapi.send(transactions)
+        resp = ffapi.send_rich(transactions)
         return resp or f"See {ffapi.INSTANCE}/tags/show/{job_tag}"
 
 

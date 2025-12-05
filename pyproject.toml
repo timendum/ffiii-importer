@@ -1,14 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
-name = "fireFly-iii-importer"
+name = "ffiii_importer"
 version = "0.1.0"
 description = "Import banks files to FireFly"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["requests>=2.24.0,<3.0.0", "openpyxl>=3.0.5,<4.0.0"]
+dependencies = [
+    "requests>=2.24.0,<3.0.0",
+    "openpyxl>=3.0.5,<4.0.0",
+    "httpx>=0.23.0,<0.29.0",
+    "attrs>=22.2.0",
+    "python-dateutil>=2.8.0,<3.0.0",
+]
 
 [tool.ruff]
-# Enable Pyflakes `E` and `F` codes by default.
-lint.select = ["E", "F", "W", "I", "N", "UP", "B", "G", "PIE", "TCH", "PLE", "PLW"]
-lint.ignore = []
 line-length = 100
-output-format = "full"
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "G",   # flake8-logging-format
+    "PIE", # flake8-pie
+    "PLE", # pylint errors
+    "PLW", # pylint warnings
+]
