@@ -2,7 +2,8 @@ import csv
 import json
 from datetime import datetime as dt
 
-import ffapi
+from ffiii_importer import ffapi
+from ffiii_importer.models import TransactionSplitStore, TransactionTypeProperty
 
 
 def _load_config():
@@ -16,11 +17,11 @@ def _load_config():
 ASSET_CONTO, EXPENSE = _load_config()
 
 
-def _transform_date(sdate: str) -> str:
-    return dt.strptime(sdate, "%d/%m/%Y").date().isoformat()
+def _transform_date(sdate: str) -> dt:
+    return dt.strptime(sdate, "%d/%m/%Y")
 
 
-class CA_Dialect(csv.Dialect):
+class CADialect(csv.Dialect):
     delimiter = ";"
     quotechar = '"'
     doublequote = True
@@ -29,7 +30,7 @@ class CA_Dialect(csv.Dialect):
     quoting = csv.QUOTE_MINIMAL
 
 
-CA_DIALECT = CA_Dialect()
+CA_DIALECT = CADialect()
 
 
 def process_csv(filename: str):
@@ -50,21 +51,21 @@ def process_csv(filename: str):
                 continue
             amounts[0] = amounts[0][1:]
             transactions.append(
-                {
-                    "type": "withdrawal",
-                    "date": _transform_date(row[1]),
-                    "source_id": ASSET_CONTO,
-                    "destination_id": EXPENSE,
-                    "amount": str(int("".join(amounts[0].split(".")))) + "." + amounts[1],
-                    "description": row[3].strip(),
-                    "notes": row[2].strip(),
-                    "tags": [job_tag],
-                }
+                TransactionSplitStore(
+                    type=TransactionTypeProperty.WITHDRAWAL,
+                    source_id=ASSET_CONTO,
+                    destination_id=EXPENSE,
+                    date=_transform_date(row[1]),
+                    description=row[3].strip(),
+                    amount=float("".join(amounts[0].split(".")) + "." + amounts[1]),
+                    notes=row[2].strip(),
+                    tags=[job_tag],
+                )
             )
         if not transactions:
             return "No transaction"
         resp = ffapi.send_rich(transactions)
-        return resp or f"See {ffapi.INSTANCE}/tags/show/{job_tag}"
+    return resp or f"See {ffapi.get_base_url()}/tags/show/{job_tag}"
 
 
 if __name__ == "__main__":

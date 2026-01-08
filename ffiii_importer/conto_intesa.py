@@ -4,7 +4,8 @@ from datetime import datetime as dt
 
 from openpyxl import load_workbook
 
-import ffapi
+from ffiii_importer import ffapi
+from ffiii_importer.models import TransactionSplitStore, TransactionTypeProperty
 
 
 def _load_config():
@@ -16,10 +17,6 @@ def _load_config():
 
 
 ASSET_CONTO, EXPENSE = _load_config()
-
-
-def _transform_date(sdate: dt) -> str:
-    return sdate.date().isoformat()
 
 
 def read_conto(filename: str):
@@ -46,26 +43,26 @@ def read_conto(filename: str):
         amounts = values[4]
         if amounts < 0:
             amounts = -amounts
-        contabile = _transform_date(row[0].value)
-        valuta = _transform_date(row[1].value)
+        contabile = row[0].value
+        valuta = row[1].value
         transactions.append(
-            {
-                "type": "withdrawal",
-                "source_id": ASSET_CONTO,
-                "destination_id": EXPENSE,
-                "amount": repr(amounts),
-                "date": contabile,
-                "description": values[2].strip(),
-                "notes": values[5].strip(),
-                "interest_date": contabile,
-                "payment_date": valuta,
-                "tags": [job_tag],
-            }
+            TransactionSplitStore(
+                type=TransactionTypeProperty.WITHDRAWAL,
+                source_id=ASSET_CONTO,
+                destination_id=EXPENSE,
+                date=contabile,
+                description=row[2].strip(),
+                payment_date=valuta,
+                amount=amounts,
+                notes=row[5].strip(),
+                tags=[job_tag],
+                interest_date=contabile,
+            )
         )
     if not transactions:
         return "No transaction"
     resp = ffapi.send_rich(transactions)
-    return resp or f"See {ffapi.INSTANCE}/tags/show/{job_tag}"
+    return resp or f"See {ffapi.get_base_url()}/tags/show/{job_tag}"
 
 
 if __name__ == "__main__":

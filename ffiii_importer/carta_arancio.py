@@ -4,16 +4,13 @@ import sys
 import warnings
 from datetime import datetime as dt
 
-import ffapi
 from openpyxl import load_workbook
 
-from ffiii_importer.firefly_iii_client.models.transaction_split_store import TransactionSplitStore
-from ffiii_importer.firefly_iii_client.models.transaction_type_property import (
-    TransactionTypeProperty,
-)
+from ffiii_importer import ffapi
+from ffiii_importer.models import TransactionSplitStore, TransactionTypeProperty
 
 
-def _load_config():
+def _load_config() -> tuple[str, str]:
     with open("config.json", encoding="utf8") as fp:
         config = json.load(fp)
     asset_carta = config["assets"]["Carta Credito ING"]
@@ -49,10 +46,10 @@ def read_carta(filename: str) -> str:
         valuta = row[1].value
         transactions.append(
             TransactionSplitStore(
-                type_=TransactionTypeProperty.WITHDRAWAL,
+                type=TransactionTypeProperty.WITHDRAWAL,
                 source_id=ASSET_CARTA,
                 destination_id=EXPENSE,
-                amount=str(int(amounts[0])) + "." + amounts[1],
+                amount=float(amounts[0] + "." + amounts[1]),
                 date=contabile,
                 description=description,
                 interest_date=contabile,

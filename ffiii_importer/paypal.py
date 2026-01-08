@@ -2,12 +2,8 @@ import csv
 import json
 from datetime import datetime as dt
 
-import ffapi
-
-from ffiii_importer.firefly_iii_client.models.transaction_split_store import TransactionSplitStore
-from ffiii_importer.firefly_iii_client.models.transaction_type_property import (
-    TransactionTypeProperty,
-)
+from ffiii_importer import ffapi
+from ffiii_importer.models import TransactionSplitStore, TransactionTypeProperty
 
 
 def _load_config():
@@ -25,7 +21,7 @@ def _transform_date(sdate: str) -> dt:
     return dt.strptime(sdate, "%d/%m/%Y").replace(hour=12, minute=0, second=0, microsecond=0)
 
 
-class PP_Dialect(csv.Dialect):
+class PPDialect(csv.Dialect):
     delimiter = ","
     quotechar = '"'
     doublequote = True
@@ -34,10 +30,10 @@ class PP_Dialect(csv.Dialect):
     quoting = csv.QUOTE_MINIMAL
 
 
-PP_DIALECT = PP_Dialect()
+PP_DIALECT = PPDialect()
 
 
-def process_csv(filename: str):
+def process_csv(filename: str) -> str:
     transactions = list[TransactionSplitStore]()
     job_tag = "import-paypal-" + dt.now().isoformat(timespec="minutes")
     with open(filename, newline="", encoding="utf8") as f:
@@ -56,11 +52,11 @@ def process_csv(filename: str):
             amounts[0] = amounts[0][1:]
             transactions.append(
                 TransactionSplitStore(
-                    type_=TransactionTypeProperty.WITHDRAWAL,
+                    type=TransactionTypeProperty.WITHDRAWAL,
                     date=_transform_date(row[0]),
                     source_id=ASSET_PAYPAL,
                     destination_id=EXPENSE,
-                    amount=str(int("".join(amounts[0].split(".")))) + "." + amounts[1],
+                    amount=float("".join(amounts[0].split(".")) + "." + amounts[1]),
                     description=" - ".join(row[3:5]),
                     currency_code=row[6],
                     tags=[job_tag],
@@ -70,7 +66,7 @@ def process_csv(filename: str):
         if not transactions:
             return "No transaction"
         resp = ffapi.send_rich(transactions)
-        return resp
+    return resp or f"See {ffapi.get_base_url()}/tags/show/{job_tag}"
 
 
 if __name__ == "__main__":

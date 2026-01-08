@@ -4,7 +4,8 @@ from datetime import datetime as dt
 
 from openpyxl import load_workbook
 
-import ffapi
+from ffiii_importer import ffapi
+from ffiii_importer.models import TransactionSplitStore, TransactionTypeProperty
 
 
 def _load_config():
@@ -16,12 +17,6 @@ def _load_config():
 
 
 ASSET_CONTO, EXPENSE = _load_config()
-
-
-def transform_date(sdate: str | dt) -> str:
-    if isinstance(sdate, dt):
-        return sdate.date().isoformat()
-    return dt.strptime(sdate, "%d/%m/%Y").date().isoformat()
 
 
 def read_conto(filename: str):
@@ -39,25 +34,25 @@ def read_conto(filename: str):
             continue
         if amounts[0][0] == "-":
             amounts[0] = amounts[0][1:]
-        contabile = transform_date(row[1].value)
-        valuta = transform_date(row[2].value)
+        contabile = row[1].value
+        valuta = row[2].value
         transactions.append(
-            {
-                "type": "withdrawal",
-                "source_id": ASSET_CONTO,
-                "destination_id": EXPENSE,
-                "amount": str(int(amounts[0])) + "." + amounts[1],
-                "date": contabile,
-                "description": row[4].value.strip(),
-                "interest_date": contabile,
-                "payment_date": valuta,
-                "tags": [job_tag, row[3].value.strip().replace(" ", "-").replace("/", "-")],
-            }
+            TransactionSplitStore(
+                type=TransactionTypeProperty.WITHDRAWAL,
+                source_id=ASSET_CONTO,
+                destination_id=EXPENSE,
+                amount=float(amounts[0] + "." + amounts[1]),
+                date=contabile,
+                description=row[4].value.strip(),
+                interest_date=contabile,
+                payment_date=valuta,
+                tags=[job_tag, row[3].value.strip().replace(" ", "-").replace("/", "-")],
+            )
         )
     if not transactions:
         return "No transaction"
     resp = ffapi.send_rich(transactions)
-    return resp or f"See {ffapi.INSTANCE}/tags/show/{job_tag}"
+    return resp or f"See {ffapi.get_base_url()}/tags/show/{job_tag}"
 
 
 if __name__ == "__main__":
