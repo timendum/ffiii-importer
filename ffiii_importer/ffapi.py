@@ -57,14 +57,14 @@ def print_progress(done: int, total: int) -> None:
 def send_rich(transactions: list[TransactionSplitStore]) -> str:
     apply_rules(transactions)
     for i, transaction in enumerate(transactions):
-        # check datamodel
+        # check data-model
         try:
             transaction.model_validate(TransactionSplitStore)
         except ValueError as e:
             print("Invalid transaction:", e, transaction.model_dump())
         resp = CLIENT.post(
             "/v1/transactions",
-            json=TransactionStore(transactions=[transaction], apply_rules=False).model_dump(
+            content=TransactionStore(transactions=[transaction], apply_rules=False).model_dump_json(
                 exclude_unset=True, exclude_none=True
             ),
         )
